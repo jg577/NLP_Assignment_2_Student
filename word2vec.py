@@ -6,6 +6,7 @@ import random
 from utils.gradcheck import gradcheck_naive
 from utils.utils import normalizeRows, softmax
 from utils.sanity_checks import *
+import pdb
 
 
 def sigmoid(x):
@@ -16,10 +17,7 @@ def sigmoid(x):
     Return:
     s -- sigmoid(x)
     """
-
-    ### YOUR CODE HERE
-    ### END YOUR CODE
-
+    s = np.exp(x)/(1+np.exp(x)) 
     return s
 
 
@@ -51,8 +49,28 @@ def naiveSoftmaxLossAndGradient(
     gradOutsideVecs -- the gradient with respect to all the outside word vectors
                     (dJ / dU)
     """
-
+    
     ### YOUR CODE HERE
+    #calculating loss
+
+    exp_all = np.exp(np.dot(centerWordVec, outsideVectors.transpose()))
+    loss_nume = exp_all[outsideWordIdx]
+    loss_denom = np.sum(exp_all)
+    loss = -1*np.log(np.divide(loss_nume, loss_denom))
+
+    # calculating gradCenterVec 
+    ## not sure about this yet, could be that the word vectors are in rows and we will have to do
+    # pdb.set_trace()
+    u_o = outsideVectors[outsideWordIdx,:]
+    second_term =  np.multiply(exp_all/loss_denom, outsideVectors.transpose())
+    gradCenterVec = -1*u_o + second_term.sum(axis=1)
+
+    #calculating gradOutsideVecs
+    centerWordVec_arr = np.array([centerWordVec]*exp_all.shape[0]).transpose()
+    gradOutsideVecs = np.multiply(exp_all/loss_denom,centerWordVec_arr)
+    gradOutsideVecs[:,outsideWordIdx] += -1*centerWordVec
+    gradOutsideVecs = gradOutsideVecs.transpose()
+
     ### END YOUR CODE
 
     return loss, gradCenterVec, gradOutsideVecs

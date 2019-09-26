@@ -92,11 +92,11 @@ def sgd(f, x0, step, iterations, postprocessing=None, useSaved=False,
         x = postprocessing(x)
         if iter % PRINT_EVERY == 0:
             if not exploss:
+                print('reached ')
                 exploss = loss
             else:
                 exploss = .95 * exploss + .05 * loss
-            print("iter %d: %f" % (iter, exploss))
-
+ 
         if iter % SAVE_PARAMS_EVERY == 0 and useSaved:
             save_params(iter, x)
 
