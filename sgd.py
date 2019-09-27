@@ -38,8 +38,10 @@ def save_params(iter, params):
     with open("saved_state_%d.pickle" % iter, "wb") as f:
         pickle.dump(random.getstate(), f)
 
+def postprocessing_fun(x):
+    return x/sum(x)
 
-def sgd(f, x0, step, iterations, postprocessing=None, useSaved=False,
+def sgd(f, x0, step, iterations, postprocessing=postprocessing_fun, useSaved=False,
         PRINT_EVERY=10):
     """ Stochastic Gradient Descent
 
@@ -87,16 +89,19 @@ def sgd(f, x0, step, iterations, postprocessing=None, useSaved=False,
 
         loss = None
         ### YOUR CODE HERE
+        loss, gradient = f(x)
+        x = x - step * gradient
         ### END YOUR CODE
-
         x = postprocessing(x)
+
         if iter % PRINT_EVERY == 0:
             if not exploss:
-                print('reached ')
                 exploss = loss
             else:
                 exploss = .95 * exploss + .05 * loss
- 
+        
+        print(f"iter {iter}, exploss {exploss}")
+
         if iter % SAVE_PARAMS_EVERY == 0 and useSaved:
             save_params(iter, x)
 

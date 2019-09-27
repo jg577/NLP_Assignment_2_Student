@@ -52,25 +52,21 @@ def naiveSoftmaxLossAndGradient(
     
     ### YOUR CODE HERE
     #calculating loss
-
     exp_all = np.exp(np.dot(centerWordVec, outsideVectors.transpose()))
     loss_nume = exp_all[outsideWordIdx]
     loss_denom = np.sum(exp_all)
     loss = -1*np.log(np.divide(loss_nume, loss_denom))
 
     # calculating gradCenterVec 
-    ## not sure about this yet, could be that the word vectors are in rows and we will have to do
-    # pdb.set_trace()
     u_o = outsideVectors[outsideWordIdx,:]
-    second_term =  np.multiply(exp_all/loss_denom, outsideVectors.transpose())
+    second_term =  np.multiply(np.divide(exp_all, loss_denom), outsideVectors.transpose())
     gradCenterVec = -1*u_o + second_term.sum(axis=1)
 
     #calculating gradOutsideVecs
     centerWordVec_arr = np.array([centerWordVec]*exp_all.shape[0]).transpose()
-    gradOutsideVecs = np.multiply(exp_all/loss_denom,centerWordVec_arr)
+    gradOutsideVecs = np.multiply(np.divide(exp_all, loss_denom),centerWordVec_arr)
     gradOutsideVecs[:,outsideWordIdx] += -1*centerWordVec
     gradOutsideVecs = gradOutsideVecs.transpose()
-
     ### END YOUR CODE
 
     return loss, gradCenterVec, gradOutsideVecs
@@ -160,7 +156,19 @@ def skipgram(currentCenterWord, windowSize, outsideWords, word2Ind,
     gradOutsideVectors = np.zeros(outsideVectors.shape)
 
     ### YOUR CODE HERE
-    ### END YOUR CODE
+    centerWordIndex = word2Ind[currentCenterWord]
+    centerWordVec = centerWordVectors[centerWordIndex]
+    for word in outsideWords:
+        word_index = word2Ind[word]
+        loss_current, gradc, grado = word2vecLossAndGradient(
+            centerWordVec=centerWordVec,
+            outsideWordIdx=word_index,
+            outsideVectors=outsideVectors,
+            dataset=dataset
+        )
+        loss += loss_current
+        gradCenterVecs[centerWordIndex] += gradc
+        gradOutsideVectors += grado
 
     return loss, gradCenterVecs, gradOutsideVectors
 
